@@ -28,7 +28,29 @@ public class Network {
 		
 		layerSizes = layers;
 		numberOfLayers = layers.length;
+		biases = new RealVector[layers.length-1];
+		weights = new RealMatrix[layers.length-1];
+		for (int i = 0; i < layers.length-1; i++) {
+			Random r = new Random();
+			
+			//es wird ein double-Array erstellt mit zufälligen werten, um dann biases daraus zu erstellen
+			double[] biasValues = new double[layers[i+1]];
+			for (int j = 0; j < biasValues.length; j++) {
+				biasValues[j] = 1;
+			}
+			biases[i] = new ArrayRealVector(biasValues);
+			
+			//es wird ein zwei dimensinales double-Array erstellt mit zufälligen werten, um dann biases daraus zu erstellen
+			double[][] weightValues =  new double[layers[i+1]][layers[i]];
+			for (int j = 0; j < weightValues.length; j++) {
+				for (int j2 = 0; j2 < weightValues[j].length; j2++) {
+					weightValues[j][j2] = 0.2;
+				}
+			}
+			weights[i] = MatrixUtils.createRealMatrix(weightValues);
+		}
 		
+		/*
 		//biases und weights werden intialisiert mit den richtigen längen
 		biases = new RealVector[layers.length-1];
 		weights = new RealMatrix[layers.length-1];
@@ -53,7 +75,7 @@ public class Network {
 			}
 			weights[i] = MatrixUtils.createRealMatrix(weightValues);
 		}
-		
+		*/
 	}
 	
 	
