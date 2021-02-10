@@ -7,96 +7,61 @@ import org.apache.commons.math3.linear.*;
 import JNNMain.exceptions.InputDoesNotMatchLayerException;
 
 
-//Dies ist die Network Klasse, die repräsentiert ein Neuronales Netz.
-//Sie enthält alle Informationen über das Netz, wie die Layer und deren Größe,
+//Dies ist die Network Klasse, die reprï¿½sentiert ein Neuronales Netz.
+//Sie enthï¿½lt alle Informationen ï¿½ber das Netz, wie die Layer und deren Grï¿½ï¿½e,
 //die Bias und Weight Werte
 
 public class Network {
 	
-	private RealVector[] biases;
-	private RealMatrix[] weights;
-	private int numberOfLayers;
-	private int[] layerSizes;
+	private RealVector[] biases;   //alle Bias werte in dem Netzwerk, jeder Vektor beschreibt die Bias-Werte eines Layers
+	private RealMatrix[] weights;  //die Weight werte einer Verbung zwischen Layern, jede Matrix beschreibt eine Verbingdung zwischen zwei Layern
+	private int numberOfLayers;    //Anzahl der Layer im Netzwerk
+	private int[] layerSizes;      //Die anzahl der Neuronen in enem Layer, der index bechreibt einen Layer
 	
-	Sigmoid sigmoidFunction;
-	
-	
-	//Der Konstuktor der Klasser, er erstellt ein Netwokr aus einem Int-Array
+	//Der Konstuktor der Klasse, er erstellt ein Network mit den Infos aus einem Int-Array
 	public Network(int[] layers) {
 		
-		sigmoidFunction = new Sigmoid();
 		
+		//die Atribute werden belegt
 		layerSizes = layers;
 		numberOfLayers = layers.length;
 		biases = new RealVector[layers.length-1];
 		weights = new RealMatrix[layers.length-1];
-		for (int i = 0; i < layers.length-1; i++) {
-			Random r = new Random();
-			
-			//es wird ein double-Array erstellt mit zufälligen werten, um dann biases daraus zu erstellen
-			double[] biasValues = new double[layers[i+1]];
-			for (int j = 0; j < biasValues.length; j++) {
-				biasValues[j] = 1;
-			}
-			biases[i] = new ArrayRealVector(biasValues);
-			
-			//es wird ein zwei dimensinales double-Array erstellt mit zufälligen werten, um dann biases daraus zu erstellen
-			double[][] weightValues =  new double[layers[i+1]][layers[i]];
-			for (int j = 0; j < weightValues.length; j++) {
-				for (int j2 = 0; j2 < weightValues[j].length; j2++) {
-					weightValues[j][j2] = 0.2;
-				}
-			}
-			weights[i] = MatrixUtils.createRealMatrix(weightValues);
-		}
-		
-		/*
-		//biases und weights werden intialisiert mit den richtigen längen
-		biases = new RealVector[layers.length-1];
-		weights = new RealMatrix[layers.length-1];
-		
 		
 		for (int i = 0; i < layers.length-1; i++) {
 			Random r = new Random();
 			
-			//es wird ein double-Array erstellt mit zufälligen werten, um dann biases daraus zu erstellen
+			//es wird ein double-Array erstellt mit zufï¿½lligen werten, um dann biases daraus zu erstellen
 			double[] biasValues = new double[layers[i+1]];
 			for (int j = 0; j < biasValues.length; j++) {
 				biasValues[j] = r.nextDouble();
 			}
-			biases[i] = new ArrayRealVector(biasValues);
+			biases[i] = new ArrayRealVector(biasValues);  //biases wird aus dem Array erstellt
 			
-			//es wird ein zwei dimensinales double-Array erstellt mit zufälligen werten, um dann biases daraus zu erstellen
+			//es wird ein zwei dimensinales double-Array erstellt mit zufï¿½lligen werten, um dann weights daraus zu erstellen
 			double[][] weightValues =  new double[layers[i+1]][layers[i]];
 			for (int j = 0; j < weightValues.length; j++) {
 				for (int j2 = 0; j2 < weightValues[j].length; j2++) {
 					weightValues[j][j2] = r.nextDouble();
 				}
 			}
-			weights[i] = MatrixUtils.createRealMatrix(weightValues);
+			weights[i] = MatrixUtils.createRealMatrix(weightValues);  //weights wird aus den Werten erstellt
 		}
-		*/
+		
 	}
 	
-	
-	public RealVector calculateArray(double[] a) throws InputDoesNotMatchLayerException{
-		if (a.length != layerSizes[0]) {
-			throw new InputDoesNotMatchLayerException(a);
-		}
-		RealVector va = new ArrayRealVector(a);
-		for (int i = 0; i < numberOfLayers-1; i++) {
-			va = weights[i].operate(va).add(biases[i]).map(sigmoidFunction);
-		}
-		return va;
-	}
-	
-	
-	class Sigmoid implements UnivariateFunction{
-		@Override
-		public double value (double x) {
-			return (1.0/(1.0+ Math.exp(x)));
-		}
-	}
-	
-
+	//die Methode die den Output eines Netzwerks berechnet
+	public RealVector calculateArray(double[] input) throws InputDoesNotMatchLayerException{
+		
+		if (input.length != layerSizes[0]) 
+			throw new InputDoesNotMatchLayerException(input); //abfrage der Fehlerbedingung und werfen eines Fehlers
+		
+		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); //s entspricht der Sigmoid-Funktion
+		
+		
+		RealVector vinput = new ArrayRealVector(input);
+		for (int i = 0; i < numberOfLayers-1; i++) 
+				vinput = ((weights[i].operate(vinput)).add(biases[i])).map(s);
+		return vinput;
+	}	
 }
