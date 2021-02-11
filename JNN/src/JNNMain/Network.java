@@ -2,7 +2,10 @@ package JNNMain;
 import java.util.Random;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 import JNNMain.exceptions.InputDoesNotMatchLayerException;
 
