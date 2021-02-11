@@ -58,7 +58,6 @@ public class Network {
 		
 		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); //s entspricht der Sigmoid-Funktion
 		
-		
 		RealVector vinput = new ArrayRealVector(input);
 		for (int i = 0; i < numberOfLayers-1; i++) 
 				vinput = ((weights[i].operate(vinput)).add(biases[i])).map(s);
