@@ -65,5 +65,13 @@ public class Network {
 		for (int i = 0; i < numberOfLayers-1; i++) 
 				vinput = ((weights[i].operate(vinput)).add(biases[i])).map(s);
 		return vinput;
-	}	
+	}
+	
+	public int getNumberOfLayers() {
+		return numberOfLayers;
+	}
+	
+	public int[] getLayerSizes() {
+		return layerSizes;
+	}
 }
