@@ -74,4 +74,13 @@ public class Network {
 	public int[] getLayerSizes() {
 		return layerSizes;
 	}
+
+	public RealVector[] getBiases() {
+		return biases;
+	}
+
+	public RealMatrix[] getWeights() {
+		return weights;
+	}
+	
 }
