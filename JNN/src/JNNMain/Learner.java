@@ -1,16 +1,17 @@
 package JNNMain;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
+
 import org.apache.commons.math3.linear.*;
 
-public class Lerner {
+public class Learner {
 	
 	Network network;
 	TrainDataSet[] trainData;
 	
 	double lerningRate;
 	
-	public Lerner(Network n, double r) {
+	public Learner(Network n, double r) {
 		network = n;
 		lerningRate = r;
 		
@@ -26,7 +27,7 @@ public class Lerner {
 		RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1];
 		RealMatrix[] weightOfset = new RealMatrix[network.getNumberOfLayers()-1];
 		for (int i = 0; i < weightOfset.length; i++) {
-			biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]); //Fülle Vector automatisch mit nullen
+			biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]);
 			weightOfset[i] = new Array2DRowRealMatrix(network.getLayerSizes()[i+1], network.getLayerSizes()[i]); //fülle Matrix automatisch mit nullen
 		}
 		
@@ -58,6 +59,7 @@ public class Lerner {
 		}
 		
 		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); //s entspricht der Sigmoid-Funktion
+		UnivariateFunction sp = (double x) -> (s.value(x)*(1-s.value(x))); //sp entspricht der Avleitung der Sigmoid-Funktion
 		
 		RealVector activation = data.getInputs();
 		RealVector[] layerActivations = new RealVector[network.getNumberOfLayers()];
@@ -70,10 +72,23 @@ public class Lerner {
 			activation = activationZ.map(s);
 			layerActivations[i+1] = activation;
 		}
+		RealVector error;
+		error = costDerivative(layerActivations[layerActivations.length-1], data.getOutputs()).ebeMultiply(layerActivationZ[layerActivationZ.length-1].map(sp));
+		biasOfset[biasOfset.length-1]=error;
+		weightOfset[weightOfset.length-1]= error.outerProduct(layerActivations[layerActivations.length-2]);
 		
-		RealVector error = costDerivative(layerActivations[layerActivations.length-1], data.getOutputs()); //befehl noch nicht beendet
+		for(int i = 2; i<network.getNumberOfLayers(); i++) {
+			activation = layerActivations[layerActivations.length-i];
+			RealVector sigPrimAct = activation.map(sp);
+			RealMatrix currentWeights = network.getWeights()[(network.getWeights().length-i)+1];
+			error = currentWeights.transpose().operate(error).ebeMultiply(sigPrimAct);
+			biasOfset[biasOfset.length-i]=error;
+			weightOfset[weightOfset.length-i]= error.outerProduct(layerActivations[(layerActivations.length-i)-1]);
+		}
 		
-		return null;
+		Gradient gradient = new Gradient(biasOfset, weightOfset);
+		
+		return gradient;
 	}
 
 	private RealVector costDerivative(RealVector a, RealVector b) {
@@ -91,5 +106,12 @@ class Gradient{
 		bias_g = b;
 		weight_g = w;
 	}
+	public RealVector[] getBias_g() {
+		return bias_g;
+	}
+	public RealMatrix[] getWeight_g() {
+		return weight_g;
+	}
+	
 }
 
