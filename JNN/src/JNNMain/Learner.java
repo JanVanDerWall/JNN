@@ -1,5 +1,9 @@
 package JNNMain;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 import org.apache.commons.math3.linear.*;
@@ -9,41 +13,65 @@ public class Learner {
 	Network network;
 	TrainDataSet[] trainData;
 	
-	double lerningRate;
 	
-	public Learner(Network n, double r) {
+	
+	public Learner(Network n) {
 		network = n;
-		lerningRate = r;
 		
 	}
 	
-	public Network trainGradientDecent() {
-		return trainGradientDecent(trainData);
-	}
-	
-	public Network trainGradientDecent(TrainDataSet[] training) {
+	public Network trainStochastikGradientDecent(double lerningRate, double epochs, int miniBatches) {
 		
-		//Erstelle die Arays mit denen dann der Gradient gespeichert wird, fülle die Arrays mit nullen
-		RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1];
-		RealMatrix[] weightOfset = new RealMatrix[network.getNumberOfLayers()-1];
-		for (int i = 0; i < weightOfset.length; i++) {
-			biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]);
-			weightOfset[i] = new Array2DRowRealMatrix(network.getLayerSizes()[i+1], network.getLayerSizes()[i]); //fülle Matrix automatisch mit nullen
-		}
+		int miniBatchSize = trainData.length / miniBatches;
 		
-		for (TrainDataSet data : training) {
-			Gradient g = backprop(data);
-			for (int i = 0; i < biasOfset.length; i++) {
-				biasOfset[i] = biasOfset[i].add(g.bias_g[i]);
-				weightOfset[i] = weightOfset[i].add(g.weight_g[i]);
+		while(epochs>miniBatchSize) {
+			
+			List<TrainDataSet> trainDataList = Arrays.asList(trainData);
+			Collections.shuffle(trainDataList);
+			TrainDataSet[] randomTrainData = new TrainDataSet[trainData.length];
+			trainDataList.toArray(randomTrainData);
+			
+			for(int i = 0; i< miniBatches && epochs>miniBatchSize ; i++) {
+				//mit subarray beenden
+				TrainDataSet[] miniBatch = new TrainDataSet[miniBatchSize];
+				for (int j = 0; j < miniBatch.length; j++) {
+					miniBatch[j] = randomTrainData[(i*miniBatchSize)+j];
+					trainGradientDecent(miniBatch, lerningRate, 1);
+				}
+				epochs =-1;
 			}
 		}
 		
-		RealMatrix[] netWeights = network.getWeights();
-		RealVector[] netBiases = network.getBiases();
-		for(int i = 0; i<network.getNumberOfLayers()-1; i++) {
-			netWeights[i] = netWeights[i].subtract(weightOfset[i].scalarMultiply((lerningRate/training.length)));
-			netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));
+		return network;
+	}
+	public Network trainGradientDecent(double lerningRate, int epochs) {	
+		return trainGradientDecent(trainData, lerningRate, epochs);
+	}
+	public Network trainGradientDecent(TrainDataSet[] training, double lerningRate, int epochs) {	
+		
+		for (int epoch=0; epoch<epochs; epoch++) {
+			//Erstelle die Arays mit denen dann der Gradient gespeichert wird, fülle die Arrays mit nullen
+			RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1];
+			RealMatrix[] weightOfset = new RealMatrix[network.getNumberOfLayers()-1];
+			for (int i = 0; i < weightOfset.length; i++) {
+				biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]);
+				weightOfset[i] = new Array2DRowRealMatrix(network.getLayerSizes()[i+1], network.getLayerSizes()[i]); //fülle Matrix automatisch mit nullen
+			}
+			
+			for (TrainDataSet data : training) {
+				Gradient g = backprop(data);
+				for (int i = 0; i < biasOfset.length; i++) {
+					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);
+					weightOfset[i] = weightOfset[i].add(g.weight_g[i]);
+				}
+			}
+			
+			RealMatrix[] netWeights = network.getWeights();
+			RealVector[] netBiases = network.getBiases();
+			for(int i = 0; i<network.getNumberOfLayers()-1; i++) {
+				netWeights[i] = netWeights[i].subtract(weightOfset[i].scalarMultiply((lerningRate/training.length)));
+				netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));
+			}
 		}
 		
 		return network;
@@ -72,6 +100,7 @@ public class Learner {
 			activation = activationZ.map(s);
 			layerActivations[i+1] = activation;
 		}
+		
 		RealVector error;
 		error = costDerivative(layerActivations[layerActivations.length-1], data.getOutputs()).ebeMultiply(layerActivationZ[layerActivationZ.length-1].map(sp));
 		biasOfset[biasOfset.length-1]=error;
@@ -114,4 +143,3 @@ class Gradient{
 	}
 	
 }
-
