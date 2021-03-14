@@ -16,9 +16,7 @@ public class TrainDataSet {
 		this.inputs = inputs;
 		this.outputs = outputs;
 		
-		if (this.inputs.getDimension() == this.outputs.getDimension()) {
-			throw new TrainingInputLengthDoesNotMatchOutput (this.inputs.getDimension(), this.outputs.getDimension());
-		}
+		
 		
 		setLength = inputs.getDimension();
 		

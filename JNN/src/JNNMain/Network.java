@@ -37,7 +37,8 @@ public class Network {
 			//es wird ein double-Array erstellt mit zuf�lligen werten, um dann biases daraus zu erstellen
 			double[] biasValues = new double[layers[i+1]];
 			for (int j = 0; j < biasValues.length; j++) {
-				biasValues[j] = r.nextDouble();
+				
+				biasValues[j] = r.nextGaussian();
 			}
 			biases[i] = new ArrayRealVector(biasValues);  //biases wird aus dem Array erstellt
 			
@@ -45,7 +46,8 @@ public class Network {
 			double[][] weightValues =  new double[layers[i+1]][layers[i]];
 			for (int j = 0; j < weightValues.length; j++) {
 				for (int j2 = 0; j2 < weightValues[j].length; j2++) {
-					weightValues[j][j2] = r.nextDouble();
+					
+					weightValues[j][j2] = r.nextGaussian();
 				}
 			}
 			weights[i] = MatrixUtils.createRealMatrix(weightValues);  //weights wird aus den Werten erstellt

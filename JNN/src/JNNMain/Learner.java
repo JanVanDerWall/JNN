@@ -11,7 +11,7 @@ import org.apache.commons.math3.linear.*;
 public class Learner {
 	
 	Network network;
-	TrainDataSet[] trainData;
+	public TrainDataSet[] trainData;
 	
 	
 	
@@ -20,27 +20,34 @@ public class Learner {
 		
 	}
 	
-	public Network trainStochastikGradientDecent(double lerningRate, double epochs, int miniBatches) {
+	public Network trainStochastikGradientDecent(double lerningRate, double epochs, int miniBatchSize) {
+		int miniBatches = trainData.length/miniBatchSize;
 		
-		int miniBatchSize = trainData.length / miniBatches;
-		
-		while(epochs>miniBatchSize) {
-			
+		for (int i = 0; i < epochs; i++) {
 			List<TrainDataSet> trainDataList = Arrays.asList(trainData);
 			Collections.shuffle(trainDataList);
 			TrainDataSet[] randomTrainData = new TrainDataSet[trainData.length];
 			trainDataList.toArray(randomTrainData);
 			
-			for(int i = 0; i< miniBatches && epochs>miniBatchSize ; i++) {
-				//mit subarray beenden
-				TrainDataSet[] miniBatch = new TrainDataSet[miniBatchSize];
-				for (int j = 0; j < miniBatch.length; j++) {
-					miniBatch[j] = randomTrainData[(i*miniBatchSize)+j];
-					trainGradientDecent(miniBatch, lerningRate, 1);
+			for (int j = 0; j < miniBatches; j++) {
+				TrainDataSet[] miniBatch= new TrainDataSet[miniBatchSize];
+				for (int k = 0; k < miniBatch.length; k++) {
+					miniBatch[k]=randomTrainData[(j*miniBatchSize)+k];
+					
 				}
-				epochs =-1;
+				
+				trainGradientDecent(miniBatch, lerningRate, miniBatchSize);
+				
+				if(j%100==0) {
+					System.out.println(j);
+				}
+				
 			}
+			System.out.println("epoch" + i);
 		}
+		
+			
+		
 		
 		return network;
 	}
@@ -72,12 +79,15 @@ public class Learner {
 				netWeights[i] = netWeights[i].subtract(weightOfset[i].scalarMultiply((lerningRate/training.length)));
 				netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));
 			}
+			
+			
+			
 		}
 		
 		return network;
 	}
 	
-	private Gradient backprop(TrainDataSet data) {
+	public Gradient backprop(TrainDataSet data) {
 		
 		RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1];
 		RealMatrix[] weightOfset = new RealMatrix[network.getNumberOfLayers()-1];
@@ -87,7 +97,7 @@ public class Learner {
 		}
 		
 		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); //s entspricht der Sigmoid-Funktion
-		UnivariateFunction sp = (double x) -> (s.value(x)*(1-s.value(x))); //sp entspricht der Avleitung der Sigmoid-Funktion
+		UnivariateFunction sp = (double x) -> (s.value(x)*(1-s.value(x))); //sp entspricht der Ableitung der Sigmoid-Funktion
 		
 		RealVector activation = data.getInputs();
 		RealVector[] layerActivations = new RealVector[network.getNumberOfLayers()];
@@ -107,7 +117,7 @@ public class Learner {
 		weightOfset[weightOfset.length-1]= error.outerProduct(layerActivations[layerActivations.length-2]);
 		
 		for(int i = 2; i<network.getNumberOfLayers(); i++) {
-			activation = layerActivations[layerActivations.length-i];
+			activation = layerActivationZ[layerActivationZ.length-i];
 			RealVector sigPrimAct = activation.map(sp);
 			RealMatrix currentWeights = network.getWeights()[(network.getWeights().length-i)+1];
 			error = currentWeights.transpose().operate(error).ebeMultiply(sigPrimAct);
@@ -128,18 +138,3 @@ public class Learner {
 
 }
 
-class Gradient{
-	public RealVector[] bias_g;
-	public RealMatrix[] weight_g;
-	public Gradient(RealVector[] b, RealMatrix[] w){
-		bias_g = b;
-		weight_g = w;
-	}
-	public RealVector[] getBias_g() {
-		return bias_g;
-	}
-	public RealMatrix[] getWeight_g() {
-		return weight_g;
-	}
-	
-}
