@@ -1,5 +1,6 @@
 package JNNMain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,7 @@ public class Learner {
 	
 	Network network;
 	public TrainDataSet[] trainData;
+	public TestDataSet[] testData;
 	
 	
 	
@@ -21,29 +23,31 @@ public class Learner {
 	}
 	
 	public Network trainStochastikGradientDecent(double lerningRate, double epochs, int miniBatchSize) {
-		int miniBatches = trainData.length/miniBatchSize;
+		int num_miniBatches = trainData.length/miniBatchSize;
+		List<TrainDataSet> trainDataList = Arrays.asList(trainData);
 		
 		for (int i = 0; i < epochs; i++) {
-			List<TrainDataSet> trainDataList = Arrays.asList(trainData);
-			Collections.shuffle(trainDataList);
+			
+			//Collections.shuffle(trainDataList);
 			TrainDataSet[] randomTrainData = new TrainDataSet[trainData.length];
 			trainDataList.toArray(randomTrainData);
 			
-			for (int j = 0; j < miniBatches; j++) {
-				TrainDataSet[] miniBatch= new TrainDataSet[miniBatchSize];
+			List<TrainDataSet[]> miniBatches = new ArrayList<>();
+			for (int j = 0; j < num_miniBatches; j++) {
+				TrainDataSet[] miniBatch = new TrainDataSet[miniBatchSize];
 				for (int k = 0; k < miniBatch.length; k++) {
-					miniBatch[k]=randomTrainData[(j*miniBatchSize)+k];
-					
+					miniBatch[k] = randomTrainData[(j*miniBatchSize)+k];
 				}
-				
-				trainGradientDecent(miniBatch, lerningRate, miniBatchSize);
-				
-				if(j%100==0) {
-					System.out.println(j);
-				}
-				
+				miniBatches.add(miniBatch);
 			}
-			System.out.println("epoch" + i);
+			
+			for (TrainDataSet[] miniBatch : miniBatches) {
+				trainGradientDecent(miniBatch, lerningRate, 1);
+			}
+			
+			
+			System.out.println("epoch " + i);
+			System.out.println(evaluate(testData));
 		}
 		
 			
@@ -79,8 +83,6 @@ public class Learner {
 				netWeights[i] = netWeights[i].subtract(weightOfset[i].scalarMultiply((lerningRate/training.length)));
 				netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));
 			}
-			
-			
 			
 		}
 		
@@ -129,12 +131,37 @@ public class Learner {
 		
 		return gradient;
 	}
+	
+	public int evaluate(TestDataSet[] data) {
+		int ammount = data.length;
+		int ammountRight = 0;
+		for (int i = 0; i < ammount; i++) {
+			RealVector result = network.calculateArray(data[i].getInputs().toArray());
+			
+			double[] arrResult = result.toArray();
+			int largestNumber = 0;
+			for (int j = 0; j < arrResult.length; j++) {
+				if (arrResult[j]>arrResult[largestNumber]) {
+					largestNumber=j;
+				}
+			}
+			
+			if (largestNumber == data[i].getOutput()) {
+				ammountRight++;
+				/*
+				System.out.println(data[i].getOutput() + " " + largestNumber);
+				System.out.println(result);
+				System.out.println();
+				*/
+			}
+		}
+		
+		return ammountRight;
+	}
 
 	private RealVector costDerivative(RealVector a, RealVector b) {
 		return a.subtract(b);
 	}
-
-	
 
 }
 

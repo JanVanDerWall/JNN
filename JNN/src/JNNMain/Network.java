@@ -1,4 +1,5 @@
 package JNNMain;
+
 import java.util.Random;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -23,7 +24,7 @@ public class Network {
 	
 	//Der Konstuktor der Klasse, er erstellt ein Network mit den Infos aus einem Int-Array
 	public Network(int[] layers) {
-		
+		Random r = new Random();
 		
 		//die Atribute werden belegt
 		layerSizes = layers;
@@ -32,25 +33,27 @@ public class Network {
 		weights = new RealMatrix[layers.length-1];
 		
 		for (int i = 0; i < layers.length-1; i++) {
-			Random r = new Random();
+			
 			
 			//es wird ein double-Array erstellt mit zuf�lligen werten, um dann biases daraus zu erstellen
 			double[] biasValues = new double[layers[i+1]];
 			for (int j = 0; j < biasValues.length; j++) {
 				
 				biasValues[j] = r.nextGaussian();
+				//biasValues[j] = 0.5;
 			}
-			biases[i] = new ArrayRealVector(biasValues);  //biases wird aus dem Array erstellt
+			biases[i] = new ArrayRealVector(biasValues);  								//biases wird aus dem Array erstellt
 			
 			//es wird ein zwei dimensinales double-Array erstellt mit zuf�lligen werten, um dann weights daraus zu erstellen
 			double[][] weightValues =  new double[layers[i+1]][layers[i]];
 			for (int j = 0; j < weightValues.length; j++) {
 				for (int j2 = 0; j2 < weightValues[j].length; j2++) {
 					
+					//weightValues[j][j2] = 0.5;
 					weightValues[j][j2] = r.nextGaussian();
 				}
 			}
-			weights[i] = MatrixUtils.createRealMatrix(weightValues);  //weights wird aus den Werten erstellt
+			weights[i] = MatrixUtils.createRealMatrix(weightValues);  				//weights wird aus den Werten erstellt
 		}
 		
 	}
@@ -59,9 +62,9 @@ public class Network {
 	public RealVector calculateArray(double[] input) throws InputDoesNotMatchLayerException{
 		
 		if (input.length != layerSizes[0]) 
-			throw new InputDoesNotMatchLayerException(input); //abfrage der Fehlerbedingung und werfen eines Fehlers
+			throw new InputDoesNotMatchLayerException(input); 					//abfrage der Fehlerbedingung und werfen eines Fehlers
 		
-		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); //s entspricht der Sigmoid-Funktion
+		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); 		//s entspricht der Sigmoid-Funktion
 		
 		RealVector vinput = new ArrayRealVector(input);
 		for (int i = 0; i < numberOfLayers-1; i++) 
@@ -84,5 +87,14 @@ public class Network {
 	public RealMatrix[] getWeights() {
 		return weights;
 	}
+
+	public void setBiases(RealVector[] biases) {
+		this.biases = biases;
+	}
+
+	public void setWeights(RealMatrix[] weights) {
+		this.weights = weights;
+	}
+	
 	
 }
