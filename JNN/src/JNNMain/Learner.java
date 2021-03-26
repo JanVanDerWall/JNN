@@ -70,18 +70,18 @@ public class Learner {
 			}
 			
 			for (TrainDataSet data : training) {
-				Gradient g = backprop(data);
-				for (int i = 0; i < biasOfset.length; i++) {
-					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);
+				Gradient g = backprop(data);                               //Gradient g ist der Gradient Vector, enthät sowohl weights als auch bias
+				for (int i = 0; i < biasOfset.length; i++) {			   //bias.Ofset.length hat den selben Wert wie weightOfset.length
+					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);		   //erstelle die Summe
 					weightOfset[i] = weightOfset[i].add(g.weight_g[i]);
 				}
 			}
 			
-			RealMatrix[] netWeights = network.getWeights();
-			RealVector[] netBiases = network.getBiases();
+			RealMatrix[] netWeights = network.getWeights();               //Weitere Referenzen auf die Netwerk Parameter, lediglich aus Gründen
+			RealVector[] netBiases = network.getBiases();					//der esthetik des späteren Codes
 			for(int i = 0; i<network.getNumberOfLayers()-1; i++) {
-				netWeights[i] = netWeights[i].subtract(weightOfset[i].scalarMultiply((lerningRate/training.length)));
-				netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));
+				netWeights[i] = netWeights[i].subtract(weightOfset[i].scalarMultiply((lerningRate/training.length)));  //der Tweite Teil der Updategleichung wird ausgeführt
+				netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));         //führ Weigts und fürs Biases. (Die Gleichung steht in der Dokumentation)
 			}
 			
 		}
@@ -132,13 +132,19 @@ public class Learner {
 		return gradient;
 	}
 	
+	//Methode die die anzahl der Richtig bewerteten Datenpunkte aus einem Gegebenen Testdatensatz errechnet
 	public int evaluate(TestDataSet[] data) {
 		int ammount = data.length;
 		int ammountRight = 0;
+		
+		//eine Schleife geht über jeden Datenpukt im Datensatz (data)
 		for (int i = 0; i < ammount; i++) {
-			RealVector result = network.calculateArray(data[i].getInputs().toArray());
 			
+			//Der Output des Netzwerks wird berrechnet
+			RealVector result = network.calculateArray(data[i].getInputs().toArray());
 			double[] arrResult = result.toArray();
+			
+			//Die größte Zahl des otputs wird bestimmt
 			int largestNumber = 0;
 			for (int j = 0; j < arrResult.length; j++) {
 				if (arrResult[j]>arrResult[largestNumber]) {
@@ -146,19 +152,17 @@ public class Learner {
 				}
 			}
 			
+			//Wenn das Ergebniss stimmt, wird amountReight um eins erhöt
 			if (largestNumber == data[i].getOutput()) {
 				ammountRight++;
-				/*
-				System.out.println(data[i].getOutput() + " " + largestNumber);
-				System.out.println(result);
-				System.out.println();
-				*/
+				
 			}
 		}
 		
 		return ammountRight;
 	}
 
+	//Methode, die die Ableitung der Kostenfunktion darstellt
 	private RealVector costDerivative(RealVector a, RealVector b) {
 		return a.subtract(b);
 	}

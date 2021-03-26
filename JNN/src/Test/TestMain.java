@@ -5,7 +5,6 @@ import JNNMain.Network;
 import JNNMain.TestDataSet;
 import JNNMain.TrainDataSet;
 import Test.MnistReader;
-import JNNMain.Gradient;
 
 import java.util.List;
 
@@ -62,14 +61,15 @@ public class TestMain {
 		*/
 		
 		
-		String imagesFile = "D:\\JNN\\JNN\\TrainData\\train-images-idx3-ubyte";
-		String lablesFile = "D:\\JNN\\JNN\\TrainData\\train-labels-idx1-ubyte";
+		String imagesFile = "TrainData/train-images-idx3-ubyte";
+		String lablesFile = "TrainData/train-labels-idx1-ubyte";
 		
-		String test_imagesFile = "D:\\JNN\\JNN\\TrainData\\t10k-images-idx3-ubyte";
-		String test_lablesFile = "D:\\JNN\\JNN\\TrainData\\t10k-labels-idx1-ubyte";
+		String test_imagesFile = "TrainData/t10k-images-idx3-ubyte";
+		String test_lablesFile = "TrainData/t10k-labels-idx1-ubyte";
 		
 		List<double[]> inputs = MnistReader.getNetworkInput(imagesFile);
 		List<double[]> outputs = MnistReader.getOptOutput(lablesFile);
+		
 		
 		
 		List<double[]> test_inputs = MnistReader.getNetworkInput(test_imagesFile);
