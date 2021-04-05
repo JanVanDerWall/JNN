@@ -187,3 +187,20 @@ public class Learner {
 
 }
 
+//Diese Klasse repräsentiert den Gradienten der Kostenfunktion, ist im Prizip lediglich ein Tupel,
+class Gradient{
+	public RealVector[] bias_g;
+	public RealMatrix[] weight_g;
+	public Gradient(RealVector[] b, RealMatrix[] w){
+		bias_g = b;
+		weight_g = w;
+	}
+	public RealVector[] getBias_g() {
+		return bias_g;
+	}
+	public RealMatrix[] getWeight_g() {
+		return weight_g;
+	}
+	
+}
+
