@@ -12,17 +12,33 @@ import org.apache.commons.math3.linear.*;
 public class Learner {
 	
 	Network network;
-	public TrainDataSet[] trainData;
-	public TestDataSet[] testData;
+	private TrainDataSet[] trainData;
+	private TrainDataSet[] testData;
 	
 	
 	
-	public Learner(Network n) {
+	public Learner(Network n, TrainDataSet[] trainData, TrainDataSet[] testData) {
 		network = n;
+		this.trainData = trainData;
+		this.testData = testData;
 		
 	}
 	
-	public Network trainStochastikGradientDecent(double lerningRate, double epochs, int miniBatchSize) {
+	public Network trainStochastikGradientDescent_ev(double learningRate, double epochs, int miniBatchSize, int evaluationFreq) {
+		
+		for (int i = 0; i < epochs; i++) {
+			trainStochastikGradientDescent(learningRate, 1, miniBatchSize);
+			if (i%evaluationFreq==0) {
+				System.out.println("epoch " + i);
+				System.out.println(evaluate(testData));
+			}
+		}
+		
+		return network;
+		
+	}
+	
+	public Network trainStochastikGradientDescent(double lerningRate, double epochs, int miniBatchSize) {
 		int num_miniBatches = trainData.length/miniBatchSize;
 		List<TrainDataSet> trainDataList = Arrays.asList(trainData);
 		
@@ -45,13 +61,7 @@ public class Learner {
 				trainGradientDecent(miniBatch, lerningRate, 1);
 			}
 			
-			
-			System.out.println("epoch " + i);
-			System.out.println(evaluate_with_TestDataSet(testData));
 		}
-		
-			
-		
 		
 		return network;
 	}
@@ -132,59 +142,41 @@ public class Learner {
 		return gradient;
 	}
 	
-	//Methode die die anzahl der Richtig bewerteten Datenpunkte aus einem Gegebenen Testdatensatz errechnet
-	public int evaluate_with_TestDataSet(TestDataSet[] data) {
-		int ammount = data.length;
+	
+	//Methode erfüllt die selbe Aufgabe wie die Vorherige, lediglich wird ein Array aus "TrainDataSet" übergeben nicht "TestDataSet"
+	public int evaluate(TrainDataSet[] data) {
+		
 		int ammountRight = 0;
 		
-		//eine Schleife geht über jeden Datenpukt im Datensatz (data)
-		for (int i = 0; i < ammount; i++) {
+		for (int i = 0; i < data.length; i++) {
 			
 			//Der Output des Netzwerks wird berrechnet
-			RealVector result = network.calculateArray(data[i].getInputs().toArray());
-			double[] arrResult = result.toArray();
+			double[] result = network.calculateArray(data[i].getInputs().toArray()).toArray();
 			
 			//Die größte Zahl des otputs wird bestimmt
 			int largestNumber = 0;
-			for (int j = 0; j < arrResult.length; j++) {
-				if (arrResult[j]>arrResult[largestNumber]) {
+			for (int j = 0; j < result.length; j++) {
+				if (result[j]>result[largestNumber]) {
 					largestNumber=j;
 				}
 			}
 			
-			//Wenn das Ergebniss stimmt, wird amountReight um eins erhöt
-			if (largestNumber == data[i].getOutput()) {
-				ammountRight++;
-				
+			
+			double[] optOutputs = data[i].getOutputs().toArray();
+			int optLargestNumber = 0;
+			for (int j = 0; j < optOutputs.length; j++) {
+				if (optOutputs[j]>optOutputs[optLargestNumber]) {
+					optLargestNumber=j;
+				}
 			}
+			
+			if(largestNumber == optLargestNumber) {
+				ammountRight++;
+			}
+			
 		}
 		
 		return ammountRight;
-	}
-	
-	//Methode erfüllt die selbe Aufgabe wie die Vorherige, lediglich wird ein Array aus "TrainDataSet" übergeben nicht "TestDataSet"
-	public int evaluate_with_TrainDataSet (TrainDataSet[] data) {
-		
-		//Das Array aus "TestDataSet" welches die selben Informationen wie "data" enthält
-		TestDataSet[] testData = new TestDataSet[data.length];
-		
-		//Das Array "testData" wird befüllt, der Code dürfte selbsterklärend sein
-		for (int i = 0; i < testData.length; i++) {
-			RealVector inputs = data[i].getInputs();
-			double[] outputs = data[i].getOutputs().toArray();
-			
-			int largestNumber = 0;
-			for (int j = 0; j < outputs.length; j++) {
-				if (outputs[j]>outputs[largestNumber]) {
-					largestNumber=j;
-				}
-			}
-			
-			testData[i] = new TestDataSet(inputs, largestNumber);
-		}
-		
-		
-		return evaluate_with_TestDataSet(testData);
 		
 	}
 
