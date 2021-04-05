@@ -2,7 +2,7 @@ package JNNMain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+
 import java.util.List;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -47,7 +47,7 @@ public class Learner {
 			
 			
 			System.out.println("epoch " + i);
-			System.out.println(evaluate(testData));
+			System.out.println(evaluate_with_TestDataSet(testData));
 		}
 		
 			
@@ -72,8 +72,8 @@ public class Learner {
 			for (TrainDataSet data : training) {
 				Gradient g = backprop(data);                               //Gradient g ist der Gradient Vector, enthät sowohl weights als auch bias
 				for (int i = 0; i < biasOfset.length; i++) {			   //bias.Ofset.length hat den selben Wert wie weightOfset.length
-					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);		   //erstelle die Summe
-					weightOfset[i] = weightOfset[i].add(g.weight_g[i]);
+					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);		   //erstelle die Summe die in der Gleichung vorkommt. Diese steht im korrespondierenden
+					weightOfset[i] = weightOfset[i].add(g.weight_g[i]);    //Kapitel der Dokumentation
 				}
 			}
 			
@@ -133,7 +133,7 @@ public class Learner {
 	}
 	
 	//Methode die die anzahl der Richtig bewerteten Datenpunkte aus einem Gegebenen Testdatensatz errechnet
-	public int evaluate(TestDataSet[] data) {
+	public int evaluate_with_TestDataSet(TestDataSet[] data) {
 		int ammount = data.length;
 		int ammountRight = 0;
 		
@@ -160,6 +160,32 @@ public class Learner {
 		}
 		
 		return ammountRight;
+	}
+	
+	//Methode erfüllt die selbe Aufgabe wie die Vorherige, lediglich wird ein Array aus "TrainDataSet" übergeben nicht "TestDataSet"
+	public int evaluate_with_TrainDataSet (TrainDataSet[] data) {
+		
+		//Das Array aus "TestDataSet" welches die selben Informationen wie "data" enthält
+		TestDataSet[] testData = new TestDataSet[data.length];
+		
+		//Das Array "testData" wird befüllt, der Code dürfte selbsterklärend sein
+		for (int i = 0; i < testData.length; i++) {
+			RealVector inputs = data[i].getInputs();
+			double[] outputs = data[i].getOutputs().toArray();
+			
+			int largestNumber = 0;
+			for (int j = 0; j < outputs.length; j++) {
+				if (outputs[j]>outputs[largestNumber]) {
+					largestNumber=j;
+				}
+			}
+			
+			testData[i] = new TestDataSet(inputs, largestNumber);
+		}
+		
+		
+		return evaluate_with_TestDataSet(testData);
+		
 	}
 
 	//Methode, die die Ableitung der Kostenfunktion darstellt

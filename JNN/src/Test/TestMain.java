@@ -90,7 +90,7 @@ public class TestMain {
 		Learner l = new Learner(net);
 		l.trainData = trainData;
 		l.testData = testData;
-		System.out.println(l.evaluate(testData));
+		System.out.println(l.evaluate_with_TestDataSet(testData));
 		l.trainStochastikGradientDecent(3, 30, 10);
 		
 		
