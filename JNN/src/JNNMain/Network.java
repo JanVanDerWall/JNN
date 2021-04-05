@@ -1,7 +1,8 @@
 package JNNMain;
 
-import java.util.Random;
 
+import java.io.Serializable;
+import java.util.Random;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.MatrixUtils;
@@ -15,7 +16,11 @@ import JNNMain.exceptions.InputDoesNotMatchLayerException;
 //Sie enth�lt alle Informationen �ber das Netz, wie die Layer und deren Gr��e,
 //die Bias und Weight Werte
 
-public class Network {
+public class Network implements Serializable{
+	
+	//Lediglich die Versionsnumer der Klasse um den Java Compiler glücklich zu machen, muss keine Weitere Beachtung geschenkt bekommen
+	private static final long serialVersionUID = 1L;
+	
 	
 	private RealVector[] biases;   //alle Bias werte in dem Netzwerk, jeder Vektor beschreibt die Bias-Werte eines Layers
 	private RealMatrix[] weights;  //die Weight werte einer Verbung zwischen Layern, jede Matrix beschreibt eine Verbingdung zwischen zwei Layern
@@ -72,6 +77,12 @@ public class Network {
 		return vinput;
 	}
 	
+	
+	
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
 	public int getNumberOfLayers() {
 		return numberOfLayers;
 	}
@@ -95,6 +106,5 @@ public class Network {
 	public void setWeights(RealMatrix[] weights) {
 		this.weights = weights;
 	}
-	
 	
 }
