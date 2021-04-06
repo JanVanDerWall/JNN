@@ -13,9 +13,9 @@ import java.util.List;
 /*Diese Klasse übernimmt das lesen des mnist-Dataset
 Dieser Code wurde von den Machern des Datasets zur verfügung gestellt
 Da sich mein Projekt mit dem erstellen von neuronalen Netzen beschaeftigen soll und nicht mit dem lesen von Datein,
-habe ich es als wenuenftig angesehen den code zu verwenden
+habe ich es als vernuenftig angesehen den code zu verwenden
 
-Einige Methoden habe ich verändert oder neu hinzugefügt, diese sind gekennzeichnet und in der Dekumentation beschrieben*/
+Einige Methoden habe ich verändert oder neu hinzugefügt, diese sind gekennzeichnet*/
 public class MnistReader {
 	
 	public static final int LABEL_FILE_MAGIC_NUMBER = 2049;

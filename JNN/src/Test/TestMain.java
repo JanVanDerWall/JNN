@@ -1,15 +1,14 @@
 package Test;
 
-import JNNMain.Learner;
-import JNNMain.Network;
-import JNNMain.TrainDataSet;
+import JNNMain.*;
+
+import java.io.IOException;
 import java.util.List;
+
 
 
 public class TestMain {
 	public static void main(String [] args) {
-		
-		
 		String imagesFile = "TrainData/train-images-idx3-ubyte";
 		String lablesFile = "TrainData/train-labels-idx1-ubyte";
 		
@@ -31,12 +30,16 @@ public class TestMain {
 		for (int i = 0; i < testData.length; i++) {
 			testData[i]=new TrainDataSet(test_inputs.get(i), test_outputs.get(i));
 		}
-		
-		int[] layers = {784,30,10};
-		Network net = new Network(layers);
-		Learner l = new Learner(net, trainData, testData);
-		System.out.println(l.evaluate(testData));
-		l.trainStochastikGradientDescent_ev(3, 30, 10, 3);
+		Network net2;
+		try {
+			net2 = NetworkFileWriter.readFromFile("test.net");
+			Learner l2 = new Learner(net2, trainData, testData);
+			System.out.println(l2.evaluate(testData));
+			NetworkFileWriter.serialize("test.ser", net2);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}	
 }

@@ -43,9 +43,7 @@ public class Network implements Serializable{
 			//es wird ein double-Array erstellt mit zuf�lligen werten, um dann biases daraus zu erstellen
 			double[] biasValues = new double[layers[i+1]];
 			for (int j = 0; j < biasValues.length; j++) {
-				
 				biasValues[j] = r.nextGaussian();
-				//biasValues[j] = 0.5;
 			}
 			biases[i] = new ArrayRealVector(biasValues);  								//biases wird aus dem Array erstellt
 			
@@ -53,8 +51,6 @@ public class Network implements Serializable{
 			double[][] weightValues =  new double[layers[i+1]][layers[i]];
 			for (int j = 0; j < weightValues.length; j++) {
 				for (int j2 = 0; j2 < weightValues[j].length; j2++) {
-					
-					//weightValues[j][j2] = 0.5;
 					weightValues[j][j2] = r.nextGaussian();
 				}
 			}
