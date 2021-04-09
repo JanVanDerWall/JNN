@@ -1,0 +1,8 @@
+{
+	"numOfLayers":3,
+	"numOfNeurons":[
+        3,5,5
+    ],
+    "learningType":"GradientDescent"
+    
+}

@@ -9,6 +9,15 @@ import java.util.List;
 
 public class TestMain {
 	public static void main(String [] args) {
+		
+		try {
+			Network net = NetworkJsonParser.getNetworkFromJson("D:\\JNN\\JNN\\src\\Test\\testNet.json");
+			System.out.println("er");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		/*
 		String imagesFile = "TrainData/train-images-idx3-ubyte";
 		String lablesFile = "TrainData/train-labels-idx1-ubyte";
 		
@@ -37,9 +46,9 @@ public class TestMain {
 			System.out.println(l2.evaluate(testData));
 			NetworkFileWriter.serialize("test.ser", net2);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
-		
+	*/
 	}	
 }
