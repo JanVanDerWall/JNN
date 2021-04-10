@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
@@ -85,13 +86,13 @@ public class Learner {
 				weightOfset[i] = new Array2DRowRealMatrix(network.getLayerSizes()[i+1], network.getLayerSizes()[i]); //fülle Matrix automatisch mit nullen
 			}
 			
-			for (TrainDataSet data : training) {
+			Stream.of(training).forEach((data) ->{
 				Gradient g = backprop(data);                               //Gradient g ist der Gradient Vector, enthät sowohl weights als auch bias
 				for (int i = 0; i < biasOfset.length; i++) {			   //bias.Ofset.length hat den selben Wert wie weightOfset.length
 					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);		   //erstelle die Summe die in der Gleichung vorkommt. Diese steht im korrespondierenden
 					weightOfset[i] = weightOfset[i].add(g.weight_g[i]);    //Kapitel der Dokumentation
 				}
-			}
+			});
 			
 			RealMatrix[] netWeights = network.getWeights();               //Weitere Referenzen auf die Netwerk Parameter, lediglich aus Gründen
 			RealVector[] netBiases = network.getBiases();					//der esthetik des späteren Codes
