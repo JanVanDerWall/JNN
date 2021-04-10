@@ -2,7 +2,7 @@ package JNNMain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -24,7 +24,13 @@ public class Learner {
 		
 	}
 	
-	public Network trainStochastikGradientDescent_ev(double learningRate, double epochs, int miniBatchSize, int evaluationFreq) {
+	public Learner(Network n, TrainDataSet[] trainData) {
+		network = n;
+		this.trainData = trainData;
+		
+	}
+	
+	public Network trainStochastikGradientDescent_ev(double learningRate, int epochs, int miniBatchSize, int evaluationFreq) {
 		
 		for (int i = 0; i < epochs; i++) {
 			trainStochastikGradientDescent(learningRate, 1, miniBatchSize);
@@ -38,13 +44,13 @@ public class Learner {
 		
 	}
 	
-	public Network trainStochastikGradientDescent(double lerningRate, double epochs, int miniBatchSize) {
+	public Network trainStochastikGradientDescent(double lerningRate, int epochs, int miniBatchSize) {
 		int num_miniBatches = trainData.length/miniBatchSize;
 		List<TrainDataSet> trainDataList = Arrays.asList(trainData);
 		
 		for (int i = 0; i < epochs; i++) {
 			
-			//Collections.shuffle(trainDataList);
+			Collections.shuffle(trainDataList);
 			TrainDataSet[] randomTrainData = new TrainDataSet[trainData.length];
 			trainDataList.toArray(randomTrainData);
 			
@@ -94,6 +100,18 @@ public class Learner {
 				netBiases[i] = netBiases[i].subtract(biasOfset[i].mapMultiply((lerningRate/training.length)));         //führ Weigts und fürs Biases. (Die Gleichung steht in der Dokumentation)
 			}
 			
+		}
+		
+		return network;
+	}
+	
+	public Network trainGradientDecent_ev(double learningRate, int epochs, int evaluationFreq){
+		for (int i = 0; i < epochs; i++) {
+			trainGradientDecent(learningRate, epochs);
+			if (i%evaluationFreq==0) {
+				System.out.println("epoch " + i);
+				System.out.println(evaluate(testData));
+			}
 		}
 		
 		return network;
@@ -160,7 +178,6 @@ public class Learner {
 					largestNumber=j;
 				}
 			}
-			
 			
 			double[] optOutputs = data[i].getOutputs().toArray();
 			int optLargestNumber = 0;

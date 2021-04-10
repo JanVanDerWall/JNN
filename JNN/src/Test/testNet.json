@@ -1,8 +1,11 @@
 {
 	"numOfLayers":3,
 	"numOfNeurons":[
-        3,5,5
+        784, 10, 10
     ],
-    "learningType":"GradientDescent"
-    
+    "learningType":"StochasticGradientDescent"
+    "epochs": 2
+    "learningRate":1
+    "miniBatchSize": 10
+    "evaluationFreq" : 1
 }

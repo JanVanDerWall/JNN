@@ -9,15 +9,6 @@ import java.util.List;
 
 public class TestMain {
 	public static void main(String [] args) {
-		
-		try {
-			Network net = NetworkJsonParser.getNetworkFromJson("D:\\JNN\\JNN\\src\\Test\\testNet.json");
-			System.out.println("er");
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		/*
 		String imagesFile = "TrainData/train-images-idx3-ubyte";
 		String lablesFile = "TrainData/train-labels-idx1-ubyte";
 		
@@ -39,6 +30,20 @@ public class TestMain {
 		for (int i = 0; i < testData.length; i++) {
 			testData[i]=new TrainDataSet(test_inputs.get(i), test_outputs.get(i));
 		}
+		LearningNetwork net;
+		try {
+			net = NetworkJsonParser.initLearningNetworkFromJSON("D:\\JNN\\JNN\\src\\Test\\testNet.json", trainData, testData);
+			net.train();
+			System.out.println(net.getLearner().evaluate(testData));
+			System.out.println("er");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		
+		/*
+		
 		Network net2;
 		try {
 			net2 = NetworkFileWriter.readFromFile("test.net");
