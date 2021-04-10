@@ -86,7 +86,7 @@ public class Learner {
 				weightOfset[i] = new Array2DRowRealMatrix(network.getLayerSizes()[i+1], network.getLayerSizes()[i]); //fülle Matrix automatisch mit nullen
 			}
 			
-			Stream.of(training).forEach((data) ->{
+			Stream.of(training).parallel().forEach((data) ->{
 				Gradient g = backprop(data);                               //Gradient g ist der Gradient Vector, enthät sowohl weights als auch bias
 				for (int i = 0; i < biasOfset.length; i++) {			   //bias.Ofset.length hat den selben Wert wie weightOfset.length
 					biasOfset[i] = biasOfset[i].add(g.bias_g[i]);		   //erstelle die Summe die in der Gleichung vorkommt. Diese steht im korrespondierenden
