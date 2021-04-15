@@ -32,8 +32,11 @@ public class TestMain {
 		}
 		LearningNetwork net;
 		try {
-			net = NetworkJsonParser.initLearningNetworkFromJSON("D:\\JNN\\JNN\\src\\Test\\testNet.json", trainData, testData);
+			net = NetworkJsonParser.initLearningNetworkFromJSON("./JNN/src/Test/testNet.json", trainData, testData);
+			var x = System.currentTimeMillis();
 			net.train();
+			var y = System.currentTimeMillis();
+			System.out.println(y-x);
 			System.out.println(net.getLearner().evaluate(testData));
 			System.out.println("er");
 		}catch(Exception e) {

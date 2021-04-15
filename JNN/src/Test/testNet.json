@@ -4,7 +4,7 @@
         784, 10, 10
     ],
     "learningType":"StochasticGradientDescent"
-    "epochs": 2
+    "epochs": 3
     "learningRate":1
     "miniBatchSize": 10
     "evaluationFreq" : 1
