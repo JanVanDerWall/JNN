@@ -30,13 +30,14 @@ public class TestMain {
 		for (int i = 0; i < testData.length; i++) {
 			testData[i]=new TrainDataSet(test_inputs.get(i), test_outputs.get(i));
 		}
+		
 		LearningNetwork net;
 		try {
-			net = NetworkJsonParser.initLearningNetworkFromJSON("./JNN/src/Test/testNet.json", trainData, testData);
-			var x = System.currentTimeMillis();
+			net = NetworkJsonParser.initLearningNetworkFromJSON("./src/Test/testNet.json", trainData, testData);
+			
 			net.train();
-			var y = System.currentTimeMillis();
-			System.out.println(y-x);
+			
+			
 			System.out.println(net.getLearner().evaluate(testData));
 			System.out.println("er");
 		}catch(Exception e) {

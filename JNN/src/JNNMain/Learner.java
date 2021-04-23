@@ -44,6 +44,7 @@ public class Learner {
 		
 	}
 	
+	//Training mit einem effizienteren Algorithmus
 	public Network trainStochastikGradientDescent(double lerningRate, int epochs, int miniBatchSize) {
 		int num_miniBatches = trainData.length/miniBatchSize;
 		List<TrainDataSet> trainDataList = Arrays.asList(trainData);
@@ -71,17 +72,22 @@ public class Learner {
 		
 		return network;
 	}
+	
+	//Training mit Gradientdescent auf Basis der Daten im Learner-Objekt
 	public Network trainGradientDecent(double lerningRate, int epochs) {	
 		return trainGradientDecent(trainData, lerningRate, epochs);
 	}
+	
+	//Training mit Gradientsescent auf Basis von übergebenen Daten
 	public Network trainGradientDecent(TrainDataSet[] training, double lerningRate, int epochs) {	
 		
 		for (int epoch=0; epoch<epochs; epoch++) {
 			//Erstelle die Arays mit denen dann der Gradient gespeichert wird, fülle die Arrays mit nullen
 			RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1];
 			RealMatrix[] weightOfset = new RealMatrix[network.getNumberOfLayers()-1];
+			
 			for (int i = 0; i < weightOfset.length; i++) {
-				biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]);
+				biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]); //automatisch mit Nullen gefüllt
 				weightOfset[i] = new Array2DRowRealMatrix(network.getLayerSizes()[i+1], network.getLayerSizes()[i]); //fülle Matrix automatisch mit nullen
 			}
 			
@@ -142,7 +148,8 @@ public class Learner {
 		}
 		
 		RealVector error;
-		error = costDerivative(layerActivations[layerActivations.length-1], data.getOutputs()).ebeMultiply(layerActivationZ[layerActivationZ.length-1].map(sp));
+		error = costDerivative(layerActivations[layerActivations.length-1], 
+				data.getOutputs()).ebeMultiply(layerActivationZ[layerActivationZ.length-1].map(sp));
 		biasOfset[biasOfset.length-1]=error;
 		weightOfset[weightOfset.length-1]= error.outerProduct(layerActivations[layerActivations.length-2]);
 		
@@ -198,7 +205,7 @@ public class Learner {
 	}
 
 	//Methode, die die Ableitung der Kostenfunktion darstellt
-	private RealVector costDerivative(RealVector a, RealVector b) {
+	private static RealVector costDerivative(RealVector a, RealVector b) {
 		return a.subtract(b);
 	}
 
