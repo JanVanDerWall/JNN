@@ -10,9 +10,14 @@ import org.json.simple.parser.*;
 
 import JNNMain.exceptions.LearningTypeNotSupported;
 
+/*
+ * Diese Klasse übernimmt das erstellen von Netzwerken aus JSON Dateien
+ */
 public class NetworkJsonParser {
 	
-	public static LearningNetwork initLearningNetworkFromJSON(String location, TrainDataSet[] trainData) throws FileNotFoundException, LearningTypeNotSupported, IOException, ParseException {
+	//erstellen eines Netzwerks ohne testData
+	public static LearningNetwork initLearningNetworkFromJSON(String location, TrainDataSet[] trainData) 
+			throws FileNotFoundException, LearningTypeNotSupported, IOException, ParseException {
 		
 		LearningNetwork net = getLearningNetworkFromJson(location);
 		
@@ -25,7 +30,7 @@ public class NetworkJsonParser {
 		return net;
 		
 	}
-	
+	//erstellen eines Netzwerks mit testData
 	public static LearningNetwork initLearningNetworkFromJSON(String location, TrainDataSet[] trainData, TrainDataSet[] testData) 
 			throws FileNotFoundException, LearningTypeNotSupported, IOException, ParseException {
 		
@@ -41,16 +46,26 @@ public class NetworkJsonParser {
 		
 	}
 	
-	private static LearningNetwork getLearningNetworkFromJson(String location) 
+	//erstellen des Learning Networks aus einer JSON-Datei
+	private static LearningNetwork getLearningNetworkFromJson(String fileLocation) 
 			throws LearningTypeNotSupported, FileNotFoundException, IOException, ParseException {
 		
-		Object obj = new JSONParser().parse(new FileReader(location));
-		JSONObject jsonObj = (JSONObject)obj;
+		JSONObject jsonObj = (JSONObject) new JSONParser().parse(new FileReader(fileLocation)); //das JSON-Objekt wird erstellt
 		
-		int[] layers = getLayersJson(jsonObj);
+		int[] layers = getLayersJson(jsonObj); //das Array mit den Layern des Netzwerks wird gezogen,  auf null wird an anderer Stelle kontrolliert
 		
+		/*
+		 * Es werden die Parameter für das Trainieren eines Netzwerks aus dem JSON-Objekt gezogen
+		 * für jeden Parameter werden Kontrollen durchgeführt, ob dieser in der JSON-Datei korrekt
+		 * angegeben ist. Es werden Null-Pointer Exceptions geworfen, sollte dies nicht der Fall sein
+		 * Wenn ein Parameter nicht korrekt oder falsch geschrieben in der JSON-Datei angegeben ist,
+		 * gibt der JSON-Reader "null" zurrück. Es kann also kontrolliert werden, ob die Entsprechenden
+		 * Java-Objekte "null" sind
+		 */
+		
+		//learning Type gibt an, welche Algorithmus verwendet werden soll
 		String learningTypeString = (String)jsonObj.get("learningType");
-		if(learningTypeString == null) {
+		if(learningTypeString == null) { //kontrolle auf null
 			throw new NullPointerException("The parameter \"learningType\" is not provided");
 		}
 		LearningType learningType;
@@ -66,20 +81,23 @@ public class NetworkJsonParser {
 			throw new LearningTypeNotSupported(learningTypeString);
 		}
 		
-		
-		Integer evaluationFreq;
-		Long evaluationFreqLong = (Long)jsonObj.get("evaluationFreq");
+		Integer evaluationFreq; //Integer Klasse ist notwendig, um auf "null" zu kontrollieren
+		//Wenn .get einen Zahlenwert zurück gibt, ist dieser vom Typ Long, er wird allerdings als "Object" zurückgegeben
+		//daher kann man die Rückgabe von .get() nur zu Long casten
+		Long evaluationFreqLong = (Long)jsonObj.get("evaluationFreq"); 
 		if(evaluationFreqLong == null) {
 			evaluationFreq=null;
 		}else {
 			evaluationFreq = evaluationFreqLong.intValue();
 		}
 		
+		// der selbe Prozess wird für alle anderen notwendigen Parameter des Netzwerks durchgeführt
 		Long epochsLong = (Long)jsonObj.get("epochs");
 		if(epochsLong == null) {
 			throw new NullPointerException("The parameter \"epochs\" is not provided");
 		}
 		int epochs = epochsLong.intValue();
+		
 		Integer miniBatchSize;
 		if (learningType == LearningType.StochasticGradientDescnet) {
 			Long miniBatchSizeLong = ((Long)jsonObj.get("miniBatchSize"));
@@ -90,17 +108,21 @@ public class NetworkJsonParser {
 		} else {
 			miniBatchSize = null;
 		}
-		Long learningRateLong = (Long)jsonObj.get("learningRate");
-		if (learningRateLong == null) {
+		
+		Number learningRateNumber = (Number)jsonObj.get("learningRate");
+		if (learningRateNumber == null) {
 			throw new NullPointerException("\"learningRate\" must be provided");
 		}
-		int learningRate = learningRateLong.intValue();
+		double learningRate = learningRateNumber.doubleValue();
 		
-		return new LearningNetwork(layers, learningType, learningRate, epochs, miniBatchSize, evaluationFreq);
+		//das Learning Network wird erstellt und zurückgegeben
+		return new LearningNetwork(layers, learningType, learningRate, epochs, miniBatchSize, evaluationFreq); 
 	}
 	
+	//Aus lesbarkeitsgründen des obrigen Codes, habe ich das ist eine eigene Methode gefasst
 	public static int[] getLayersJson(JSONObject jsonObj) throws FileNotFoundException, 
 	IOException, ParseException, LearningTypeNotSupported {
+		// Code folgt den Selben Mustern wie der obrige Code
 		
 		Long numOfLayersLong = ((Long)jsonObj.get("numOfLayers"));
 		if(numOfLayersLong == null) {
@@ -115,10 +137,12 @@ public class NetworkJsonParser {
 		}
 		
 		int[] layers = new int[numOfLayers];
+		//number of Layers und die Länge des Arrays müssen gleich sein
 		if (numOfLayers != jsonNeurons.size()) {
 			throw new IndexOutOfBoundsException("Array elements: " + jsonNeurons.size() + 
 					" numOfLayers: " + numOfLayers);
 		}
+		//das JSON-Array wird in das int Array geschrieben
 		for (int i = 0; i < numOfLayers; i++) {
 			layers[i] = ((Long)jsonNeurons.get(i)).intValue();
 		}

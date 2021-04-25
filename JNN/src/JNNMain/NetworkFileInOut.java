@@ -14,7 +14,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-public class NetworkFileWriter {
+public class NetworkFileInOut {
 	
 	//Serialisiert das Netzwerk in eine Datei
 	public static void serialize (String destination, Network net) throws FileNotFoundException, IOException {
@@ -35,6 +35,7 @@ public class NetworkFileWriter {
 	
 	//Speichert ein Network in einem für diese Bibliothek einzigartigem Dateiformat
 	//Wie diese Datein aufgebaut sind, ist der Dokumentation zu entnehmen
+	//sollte das bekannt sein, dürfte dieser Code recht selbsterklärend sein
 	public static void writeToFile (String destination, Network net) throws IOException {
 		
 		DataOutputStream out = new DataOutputStream(new FileOutputStream(destination));
@@ -66,12 +67,13 @@ public class NetworkFileWriter {
 		
 		out.close();
 	}
-	
+	//ließt ein Netzwerk aus einer solchen Datei
 	public static Network readFromFile(String location) throws IOException{
+		
 		DataInputStream in = new DataInputStream(new FileInputStream(location));
 		
 		long versionID = in.readLong();
-		assert (versionID==Network.getSerialversionuid());
+		assert (versionID==Network.getSerialversionuid()); //sollte ich das Dateiformat zwischendurch geändert haben, habe ich auch eine Andere Version ID
 		int numOfLayers = in.readInt();
 		int[] layers = new int[numOfLayers];
 		

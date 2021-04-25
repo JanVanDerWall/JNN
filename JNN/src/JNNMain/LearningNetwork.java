@@ -1,11 +1,14 @@
 package JNNMain;
 
 import javax.management.RuntimeErrorException;
-
+/*
+ * Die Klasse fasst ein Network und einen Learner zusammen
+ * So muss der Benutzer der Bibliothek nicht beides verwenden
+ * Es ist besonders bei der Verwendung von JSON-Dateien praktisch
+ */
 public class LearningNetwork extends Network{
 	
-	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L; //Da Network serialisierbar ist, muss auch hier eine serienNummer vorhanden sein
 	private Learner learner;
 	private LearningType learningType;
 	private double learningRate;
@@ -17,6 +20,7 @@ public class LearningNetwork extends Network{
 	
 	public LearningNetwork(int[] layers, LearningType type, double learningRate, 
 			int epochs, Integer miniBatchSize, Integer evaluationFreq) {
+		
 		super(layers);
 		this.learningType = type;
 		this.learningRate = learningRate;
@@ -24,6 +28,7 @@ public class LearningNetwork extends Network{
 		if (miniBatchSize!=null) {
 			this.miniBatchSize = miniBatchSize;
 		}
+		//wenn kein Evaluierungs Frequenz gegeben ist, ist eval=false
 		if (evaluationFreq != null) {
 			eval = true;
 			this.evaluationFreq = evaluationFreq;
@@ -32,6 +37,7 @@ public class LearningNetwork extends Network{
 		}
 	}
 	
+	//Die zwei Methoden, um den Learner zu initialisieren
 	public void learnerInit(TrainDataSet[] trainData) {
 		learner = new Learner(this, trainData);
 	}
@@ -40,24 +46,39 @@ public class LearningNetwork extends Network{
 		learner = new Learner(this, trainData, testData);
 	}
 	
+	//Es muss zum trainieren lediglich eine Methode aufgerufen werden
 	public Network train() {
 		Network net=null;
 		if (eval) {
-			if (learningType == LearningType.GradientDescent) {
+			//durch den switch können einfach weitere Algorithmen hinzugefügt werden
+			switch(learningType) {
+			case GradientDescent:
 				System.out.println("trainig with Gradientdescent and evaluation");
 				net = learner.trainGradientDecent_ev(learningRate, epochs, evaluationFreq);
-			} else if(learningType == LearningType.StochasticGradientDescnet) {
+				break;
+			case StochasticGradientDescnet:
 				System.out.println("trainig with stochastic Gradientdescent and evaluation");
 				net = learner.trainStochastikGradientDescent_ev(learningRate, epochs, miniBatchSize, evaluationFreq);
+			default:
+				break;
+		
 			}
 		} else {
-			if (learningType == LearningType.GradientDescent) {
+			switch(learningType) {
+			case GradientDescent:
 				System.out.println("trainig with Gradientdescent and without evaluation");
 				net = learner.trainGradientDecent(learningRate, epochs);
-			} else if(learningType == LearningType.StochasticGradientDescnet) {
+				break;
+			case StochasticGradientDescnet:
 				System.out.println("trainig with stochastic Gradientdescent and without evaluation");
 				net = learner.trainStochastikGradientDescent(learningRate, epochs, miniBatchSize);
+			default:
+				break;
+		
 			}
+		}
+		if (net==null) {
+			throw new RuntimeException("Irgendwas ist grundsätzlich falsch gelaufen, nicht ihr Fehler");
 		}
 		return net;
 	}

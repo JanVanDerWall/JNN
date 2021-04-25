@@ -34,7 +34,7 @@ public class Network implements Serializable{
 		//die Atribute werden belegt
 		layerSizes = layers;
 		numberOfLayers = layers.length;
-		biases = new RealVector[layers.length-1];
+		biases = new RealVector[layers.length-1]; //Länge -1, da der Input, Layer weder Bias noch Weights hat
 		weights = new RealMatrix[layers.length-1];
 		
 		for (int i = 0; i < layers.length-1; i++) {

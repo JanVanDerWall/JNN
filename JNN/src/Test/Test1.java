@@ -1,14 +1,17 @@
 package Test;
 
-import JNNMain.*;
-
-import java.io.IOException;
 import java.util.List;
 
+import JNNMain.Learner;
+import JNNMain.LearningNetwork;
+import JNNMain.Network;
+import JNNMain.NetworkJsonParser;
+import JNNMain.TrainDataSet;
 
-
-public class TestMain {
+public class Test1 {
 	public static void main(String [] args) {
+		
+		//Laden der Trainingsdaten, in diesem Fall das Mnist Data Set
 		String imagesFile = "TrainData/train-images-idx3-ubyte";
 		String lablesFile = "TrainData/train-labels-idx1-ubyte";
 		
@@ -31,19 +34,16 @@ public class TestMain {
 			testData[i]=new TrainDataSet(test_inputs.get(i), test_outputs.get(i));
 		}
 		
-		LearningNetwork net;
-		try {
-			net = NetworkJsonParser.initLearningNetworkFromJSON("./src/Test/testNet.json", trainData, testData);
-			System.out.println(net.getLearner().evaluate(testData));
-			net.train();
-			
-			
-			
-			System.out.println("er");
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
+		//erstellen eines Netzwerks mit 3 Layern und der angegeben Anzahl an neuronen
+		int[] layers = {784, 30, 10}; 
+		Network net = new Network(layers);
+		//Erstellen des Learners
+		Learner l = new Learner(net, trainData, testData);
+		//Initiale Evaluierung des zufälligen Netzwerks
+		System.out.println(l.evaluate(testData)+ " of " + testData.length);
+		//Trainieren des Netzwerks
+		l.trainStochastikGradientDescent_ev(3, 20, 10, 1);
+		System.out.println("TRaining beendet");
 		
-		
-	}	
+	}
 }

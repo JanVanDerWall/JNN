@@ -30,10 +30,14 @@ public class Learner {
 		
 	}
 	
+	//Stochastic Gradient Descent mit der möglichkeit die Performance des Netzwerks zu evaluieren
 	public Network trainStochastikGradientDescent_ev(double learningRate, int epochs, int miniBatchSize, int evaluationFreq) {
 		
+		//Wiederholung nach der Enzahl der Epochen , 1 Wiedeholung = eine Epoche
 		for (int i = 0; i < epochs; i++) {
-			trainStochastikGradientDescent(learningRate, 1, miniBatchSize);
+			trainStochastikGradientDescent(learningRate, 1, miniBatchSize); //Durchführen des Stochastic Gradientd Descent mit einer Epoche
+			
+			//Evaluieren des Netzwerks, bestimmt durch evaluationFreq
 			if (i%evaluationFreq==0) {
 				System.out.println("epoch " + i);
 				System.out.println(evaluate(testData));
@@ -44,18 +48,35 @@ public class Learner {
 		
 	}
 	
+	//Identische Funktionsweise zu trainStochastikGradientDescent_ev,  es wird jedoch der einfache Gradient Descent verwendet
+	public Network trainGradientDecent_ev(double learningRate, int epochs, int evaluationFreq){
+		for (int i = 0; i < epochs; i++) {
+			trainGradientDecent(learningRate, epochs);
+			if (i%evaluationFreq==0) {
+				System.out.println("epoch " + i);
+				System.out.println(evaluate(testData));
+			}
+		}
+		
+		return network;
+	}
+	
+	
 	//Training mit einem effizienteren Algorithmus
 	public Network trainStochastikGradientDescent(double lerningRate, int epochs, int miniBatchSize) {
-		int num_miniBatches = trainData.length/miniBatchSize;
-		List<TrainDataSet> trainDataList = Arrays.asList(trainData);
+		int num_miniBatches = trainData.length/miniBatchSize;			//bestimmen der größe eines Subsets der Trainigsdaten
+		List<TrainDataSet> trainDataList = Arrays.asList(trainData);	//Die Liste wird verwendet um die .schuffle Methode zu benutzen
 		
+		//Wiederholung nach der Enzahl der Epochen
 		for (int i = 0; i < epochs; i++) {
 			
+			//erstellen eines Zufällig gemischten Arrays
 			Collections.shuffle(trainDataList);
 			TrainDataSet[] randomTrainData = new TrainDataSet[trainData.length];
 			trainDataList.toArray(randomTrainData);
 			
-			List<TrainDataSet[]> miniBatches = new ArrayList<>();
+			List<TrainDataSet[]> miniBatches = new ArrayList<>(); //Liste mit den "Mini"-Batches
+			//"miniBatches" wird mit Subsets der Trainigsdaten von der Größe miniBatchSize befüllt
 			for (int j = 0; j < num_miniBatches; j++) {
 				TrainDataSet[] miniBatch = new TrainDataSet[miniBatchSize];
 				for (int k = 0; k < miniBatch.length; k++) {
@@ -64,6 +85,8 @@ public class Learner {
 				miniBatches.add(miniBatch);
 			}
 			
+			//Gradient Decent wird mit jeder MiniBatch ausgeführt, dabei wird nur eine Epoche verwendet, 
+			//da die Epoche verwendet
 			for (TrainDataSet[] miniBatch : miniBatches) {
 				trainGradientDecent(miniBatch, lerningRate, 1);
 			}
@@ -111,21 +134,10 @@ public class Learner {
 		return network;
 	}
 	
-	public Network trainGradientDecent_ev(double learningRate, int epochs, int evaluationFreq){
-		for (int i = 0; i < epochs; i++) {
-			trainGradientDecent(learningRate, epochs);
-			if (i%evaluationFreq==0) {
-				System.out.println("epoch " + i);
-				System.out.println(evaluate(testData));
-			}
-		}
-		
-		return network;
-	}
 	
 	public Gradient backprop(TrainDataSet data) {
 		
-		RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1];
+		RealVector[] biasOfset = new ArrayRealVector[network.getNumberOfLayers()-1]; //Länge -1, da der Input, Layer weder Bias noch Weights hat
 		RealMatrix[] weightOfset = new RealMatrix[network.getNumberOfLayers()-1];
 		for (int i = 0; i < weightOfset.length; i++) {
 			biasOfset[i] = new ArrayRealVector(network.getLayerSizes()[i+1]); //Fülle Vector automatisch mit nullen
@@ -135,40 +147,47 @@ public class Learner {
 		UnivariateFunction s = (double x) -> (1.0/(1.0+ Math.exp(-x))); //s entspricht der Sigmoid-Funktion
 		UnivariateFunction sp = (double x) -> (s.value(x)*(1-s.value(x))); //sp entspricht der Ableitung der Sigmoid-Funktion
 		
-		RealVector activation = data.getInputs();
-		RealVector[] layerActivations = new RealVector[network.getNumberOfLayers()];
-		layerActivations[0]=activation;
-		RealVector[] layerActivationZ = new RealVector[network.getNumberOfLayers()-1]; //Die Aktivations der Layer ohne die Sigmoid funktion
+		RealVector activation = data.getInputs(); //der erste Input
+		RealVector[] layerActivations = new RealVector[network.getNumberOfLayers()];    //Die Outputs bzw. Inputs der Layer
+		layerActivations[0]=activation;													//die Inputs zum ersten Layer sind gegeben
+		RealVector[] layerActivationZ = new RealVector[network.getNumberOfLayers()-1]; //Die Aktivations (Outputs) der Layer ohne die Sigmoid funktion
 		
+		//der Ouput des Netzwerks wird berechnet, dabei werden alle Daten gespeichert, die wichtig sind
+		//entspricht zu großen teilen der Berechnung des Outputs eines Netzwerks
 		for (int i = 0; i < network.getNumberOfLayers()-1; i++) {
-			RealVector activationZ = network.getWeights()[i].operate(activation).add(network.getBiases()[i]);
-			layerActivationZ[i]= activationZ;
-			activation = activationZ.map(s);
-			layerActivations[i+1] = activation;
+			RealVector activationZ = network.getWeights()[i].operate(activation).
+					add(network.getBiases()[i]); //wie das Berechnen des Netzwerkoutputs, ohne Sigmoid
+			layerActivationZ[i]= activationZ; //Zwischenwerte werden gespeichert
+			activation = activationZ.map(s);	//berechnen des outputs mit Sigmoid
+			layerActivations[i+1] = activation; //+1, da die Inputs Ebenfalls abgespeichert werden
 		}
 		
 		RealVector error;
-		error = costDerivative(layerActivations[layerActivations.length-1], 
-				data.getOutputs()).ebeMultiply(layerActivationZ[layerActivationZ.length-1].map(sp));
-		biasOfset[biasOfset.length-1]=error;
-		weightOfset[weightOfset.length-1]= error.outerProduct(layerActivations[layerActivations.length-2]);
 		
+		//Error und Ableitungen werden für den letzten Layer berechnet
+		error = layerActivations[layerActivations.length-1].subtract(data.getOutputs()).ebeMultiply(layerActivationZ[layerActivationZ.length-1].map(sp)); //Gleichung nr. 1 wird ausgeführt
+		biasOfset[biasOfset.length-1]=error; //Gleichung nr.3 wird ausgeführt
+		weightOfset[weightOfset.length-1]= error.outerProduct(layerActivations[layerActivations.length-2]); //Gleichung nr. 4 wird ausgeführt
+		
+		//der Error und die Ableitungen werden für die Anderen Layer berechnet
 		for(int i = 2; i<network.getNumberOfLayers(); i++) {
+			//in den Folgenden 4 Zeilen wird Gleichung Nr. 2 Ausgeführt
 			activation = layerActivationZ[layerActivationZ.length-i];
 			RealVector sigPrimAct = activation.map(sp);
 			RealMatrix currentWeights = network.getWeights()[(network.getWeights().length-i)+1];
 			error = currentWeights.transpose().operate(error).ebeMultiply(sigPrimAct);
-			biasOfset[biasOfset.length-i]=error;
-			weightOfset[weightOfset.length-i]= error.outerProduct(layerActivations[(layerActivations.length-i)-1]);
+			
+			biasOfset[biasOfset.length-i]=error; //Gleichung nr.3 wird ausgeführt
+			weightOfset[weightOfset.length-i]= error.outerProduct(layerActivations[(layerActivations.length-i)-1]); //Gleichung nr. 4 wird ausgeführt
 		}
 		
-		Gradient gradient = new Gradient(biasOfset, weightOfset);
+		Gradient gradient = new Gradient(biasOfset, weightOfset); //biasOfset und weightOfset werden in einem Gradienten zusammengefasst um sie zurück zu geben
 		
 		return gradient;
 	}
 	
 	
-	//Methode erfüllt die selbe Aufgabe wie die Vorherige, lediglich wird ein Array aus "TrainDataSet" übergeben nicht "TestDataSet"
+	//Evaluiert wie gut das Netzwerk ist, gibt die Anzahl der richtig erkannten Bilder zurück
 	public int evaluate(TrainDataSet[] data) {
 		
 		int ammountRight = 0;
@@ -186,6 +205,7 @@ public class Learner {
 				}
 			}
 			
+			//Die größte Zahl des Optimalen outputs wird bestimmt
 			double[] optOutputs = data[i].getOutputs().toArray();
 			int optLargestNumber = 0;
 			for (int j = 0; j < optOutputs.length; j++) {
@@ -194,24 +214,18 @@ public class Learner {
 				}
 			}
 			
+			//wenn die beiden größten Zahlen übereinstimmen, lag das Netzwerk richtig
 			if(largestNumber == optLargestNumber) {
 				ammountRight++;
 			}
 			
 		}
-		
 		return ammountRight;
-		
-	}
-
-	//Methode, die die Ableitung der Kostenfunktion darstellt
-	private static RealVector costDerivative(RealVector a, RealVector b) {
-		return a.subtract(b);
 	}
 
 }
 
-//Diese Klasse repräsentiert den Gradienten der Kostenfunktion, ist im Prizip lediglich ein Tupel,
+//Diese Klasse repräsentiert den Gradienten der Kostenfunktion, ist im Prizip lediglich ein Tupel
 class Gradient{
 	public RealVector[] bias_g;
 	public RealMatrix[] weight_g;
